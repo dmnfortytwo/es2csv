@@ -1,12 +1,10 @@
 import os
+import sys
 import time
 import json
 import codecs
 import elasticsearch
-import progressbar
-from backports import csv
 from functools import wraps
-
 
 FLUSH_BUFFER = 1000  # Chunk of docs to flush in temp file
 CONNECTION_TIMEOUT = 120
@@ -51,7 +49,6 @@ class Es2csv:
         self.scroll_ids = []
         self.scroll_time = '30m'
 
-        self.csv_headers = list(META_FIELDS) if self.opts.meta_fields else []
         self.tmp_file = '{}.tmp'.format(opts.output_file)
 
     @retry(elasticsearch.exceptions.ConnectionError, tries=TIMES_TO_TRY)
@@ -88,6 +85,7 @@ class Es2csv:
             terminate_after=self.opts.max_results
         )
 
+
         if self.opts.doc_types:
             search_args['doc_type'] = self.opts.doc_types
 
@@ -109,11 +107,18 @@ class Es2csv:
         else:
             query = self.opts.query if not self.opts.tags else '{} AND tags: ({})'.format(
                 self.opts.query, ' AND '.join(self.opts.tags))
+            if self.opts.range_from or self.opts.range_to:
+              if self.opts.range_from:
+                if self.opts.range_to:
+                  query = "{} AND @timestamp:[{} TO {}]".format(query, self.opts.range_from, self.opts.range_to)
+                else:
+                  query = "{} AND @timestamp:[{} TO now]".format(query, self.opts.range_from)
+              else:
+                query = "{} AND @timestamp:[1970-01-01 TO {}]".format(query, self.opts.range_to)
             search_args['q'] = query
 
         if '_all' not in self.opts.fields:
             search_args['_source_include'] = ','.join(self.opts.fields)
-            self.csv_headers.extend([unicode(field, "utf-8") for field in self.opts.fields if '*' not in field])
 
         if self.opts.debug_mode:
             print('Using these indices: {}.'.format(', '.join(self.opts.index_prefixes)))
@@ -137,16 +142,6 @@ class Es2csv:
             hit_list = []
             total_lines = 0
 
-            widgets = ['Run query ',
-                       progressbar.Bar(left='[', marker='#', right=']'),
-                       progressbar.FormatLabel(' [%(value)i/%(max)i] ['),
-                       progressbar.Percentage(),
-                       progressbar.FormatLabel('] [%(elapsed)s] ['),
-                       progressbar.ETA(), '] [',
-                       progressbar.FileTransferSpeed(unit='docs'), ']'
-                       ]
-            bar = progressbar.ProgressBar(widgets=widgets, maxval=self.num_results).start()
-
             while total_lines != self.num_results:
                 if res['_scroll_id'] not in self.scroll_ids:
                     self.scroll_ids.append(res['_scroll_id'])
@@ -156,7 +151,8 @@ class Es2csv:
                     break
                 for hit in res['hits']['hits']:
                     total_lines += 1
-                    bar.update(total_lines)
+                    if not total_lines % 20 or total_lines == self.num_results:
+                      sys.stdout.write("\rReading from Elasticsearch: {} of {}".format(total_lines, self.num_results))
                     hit_list.append(hit)
                     if len(hit_list) == FLUSH_BUFFER:
                         self.flush_to_file(hit_list)
@@ -167,8 +163,8 @@ class Es2csv:
                             print('Hit max result limit: {} records'.format(self.opts.max_results))
                             return
                 res = next_scroll(res['_scroll_id'])
+            sys.stdout.write("\n")
             self.flush_to_file(hit_list)
-            bar.finish()
 
     def flush_to_file(self, hit_list):
         def to_keyvalue_pairs(source, ancestors=[], header_delimeter='.'):
@@ -189,8 +185,6 @@ class Es2csv:
                     [to_keyvalue_pairs(item, ancestors + [str(index)]) for index, item in enumerate(source)]
             else:
                 header = header_delimeter.join(ancestors)
-                if header not in self.csv_headers:
-                    self.csv_headers.append(header)
                 try:
                     out[header] = '{}{}{}'.format(out[header], self.opts.delimiter, source)
                 except:
@@ -209,25 +203,22 @@ class Es2csv:
             self.num_results = sum(1 for line in codecs.open(self.tmp_file, mode='r', encoding='utf-8'))
             if self.num_results > 0:
                 output_file = codecs.open(self.opts.output_file, mode='a', encoding='utf-8')
-                csv_writer = csv.DictWriter(output_file, fieldnames=self.csv_headers)
-                csv_writer.writeheader()
                 timer = 0
-                widgets = ['Write to csv ',
-                           progressbar.Bar(left='[', marker='#', right=']'),
-                           progressbar.FormatLabel(' [%(value)i/%(max)i] ['),
-                           progressbar.Percentage(),
-                           progressbar.FormatLabel('] [%(elapsed)s] ['),
-                           progressbar.ETA(), '] [',
-                           progressbar.FileTransferSpeed(unit='lines'), ']'
-                           ]
-                bar = progressbar.ProgressBar(widgets=widgets, maxval=self.num_results).start()
 
                 for line in codecs.open(self.tmp_file, mode='r', encoding='utf-8'):
                     timer += 1
-                    bar.update(timer)
-                    csv_writer.writerow(json.loads(line))
+                    if not timer % 20 or timer == self.num_results:
+                      sys.stdout.write("\rWriting to file: {} of {}".format(timer, self.num_results))
+                    jline = json.loads(line)
+                    string = ""
+                    for field in self.opts.fields:
+                      if string:
+                        string = "{} {}".format(string, jline[field])
+                      else:
+                        string = jline[field]
+                    output_file.write("{}\n".format(string))
                 output_file.close()
-                bar.finish()
+                sys.stdout.write("\n")
             else:
                 print('There is no docs with selected field(s): {}.'.format(','.join(self.opts.fields)))
             os.remove(self.tmp_file)

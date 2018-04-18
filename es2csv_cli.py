@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 """
-title:           A CLI tool for exporting data from Elasticsearch into a CSV file.
-description:     Command line utility, written in Python, for querying Elasticsearch in Lucene query syntax or Query DSL syntax and exporting result as documents into a CSV file.
-usage:           es2csv -q '*' -i _all -e -o ~/file.csv -k -m 100
-                 es2csv -q '{"query": {"match_all": {}}}' -r -i _all -o ~/file.csv
-                 es2csv -q @'~/long_query_file.json' -r -i _all -o ~/file.csv
-                 es2csv -q '*' -i logstash-2015-01-* -f host status message -o ~/file.csv
-                 es2csv -q 'host: localhost' -i logstash-2015-01-01 logstash-2015-01-02 -f host status message -o ~/file.csv
-                 es2csv -q 'host: localhost AND status: GET' -u http://kibana.com:80/es/ -o ~/file.csv
-                 es2csv -q '*' -t dev prod -u http://login:password@kibana.com:6666/es/ -o ~/file.csv
-                 es2csv -q '{"query": {"match_all": {}}, "filter":{"term": {"tags": "dev"}}}' -r -u http://login:password@kibana.com:6666/es/ -o ~/file.csv
+title:           A CLI tool for exporting data from Elasticsearch into a raw text file.
+description:     Command line utility, written in Python, for querying Elasticsearch in Lucene query syntax or Query DSL syntax and exporting result as documents into a text file.
+usage:           es2csv -q '*' -i _all -e -o ~/file.txt -k -m 100
+                 es2csv -q '{"query": {"match_all": {}}}' -r -i _all -o ~/file.txt
+                 es2csv -q @'~/long_query_file.json' -r -i _all -o ~/file.txt
+                 es2csv -q '*' -i logstash-2015-01-* -f host status message -o ~/file.txt
+                 es2csv -q 'host: localhost' -i logstash-2015-01-01 logstash-2015-01-02 -f host status message -o ~/file.txt
+                 es2csv -q 'host: localhost AND status: GET' -u http://kibana.com:80/es/ -o ~/file.txt
+                 es2csv -q '*' -t dev prod -u http://login:password@kibana.com:6666/es/ -o ~/file.txt
+                 es2csv -q '{"query": {"match_all": {}}, "filter":{"term": {"tags": "dev"}}}' -r -u http://login:password@kibana.com:6666/es/ -o ~/file.txt
+                es2csv_cli.py -i 'abcd--*' -q 'original_tag: parsed.audit' -o z -f @timestamp original_line --to '2018-04-18T23:00'
 """
 import sys
 import argparse
@@ -41,6 +42,8 @@ def main():
     p.add_argument('--client-key', dest='client_key', default=None, type=str, help='Location of Client Cert Key.')
     p.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__, help='Show version and exit.')
     p.add_argument('--debug', dest='debug_mode', action='store_true', help='Debug mode on.')
+    p.add_argument('--from', dest='range_from', default=None, type=str, help='Timestamp range: from')
+    p.add_argument('--to', dest='range_to', default=None, type=str, help='Timestamp range: to')
 
     if len(sys.argv) == 1:
         p.print_help()

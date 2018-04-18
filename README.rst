@@ -2,6 +2,16 @@
 es2csv
 ======
 
+This is modified version of original es2csv.
+
+Removed:
+- csv support (surprise!), export to generic txt file without string escape
+- progressbar. dummy version added instead
+Added:
+- query range support. --from <date> (default to 1970-01-01) and --to <date> (default now)
+
+
+
 A CLI tool for exporting data from Elasticsearch into a CSV file
 ----------------------------------------------------------------
 
