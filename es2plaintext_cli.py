@@ -2,19 +2,19 @@
 """
 title:           A CLI tool for exporting data from Elasticsearch into a raw text file.
 description:     Command line utility, written in Python, for querying Elasticsearch in Lucene query syntax or Query DSL syntax and exporting result as documents into a text file.
-usage:           es2csv -q '*' -i _all -e -o ~/file.txt -k -m 100
-                 es2csv -q '{"query": {"match_all": {}}}' -r -i _all -o ~/file.txt
-                 es2csv -q @'~/long_query_file.json' -r -i _all -o ~/file.txt
-                 es2csv -q '*' -i logstash-2015-01-* -f host status message -o ~/file.txt
-                 es2csv -q 'host: localhost' -i logstash-2015-01-01 logstash-2015-01-02 -f host status message -o ~/file.txt
-                 es2csv -q 'host: localhost AND status: GET' -u http://kibana.com:80/es/ -o ~/file.txt
-                 es2csv -q '*' -t dev prod -u http://login:password@kibana.com:6666/es/ -o ~/file.txt
-                 es2csv -q '{"query": {"match_all": {}}, "filter":{"term": {"tags": "dev"}}}' -r -u http://login:password@kibana.com:6666/es/ -o ~/file.txt
-                es2csv_cli.py -i 'abcd--*' -q 'original_tag: parsed.audit' -o z -f @timestamp original_line --to '2018-04-18T23:00'
+usage:           es2plaintext -q '*' -i _all -e -o ~/file.txt -k -m 100
+                 es2plaintext -q '{"query": {"match_all": {}}}' -r -i _all -o ~/file.txt
+                 es2plaintext -q @'~/long_query_file.json' -r -i _all -o ~/file.txt
+                 es2plaintext -q '*' -i logstash-2015-01-* -f host status message -o ~/file.txt
+                 es2plaintext -q 'host: localhost' -i logstash-2015-01-01 logstash-2015-01-02 -f host status message -o ~/file.txt
+                 es2plaintext -q 'host: localhost AND status: GET' -u http://kibana.com:80/es/ -o ~/file.txt
+                 es2plaintext -q '*' -t dev prod -u http://login:password@kibana.com:6666/es/ -o ~/file.txt
+                 es2plaintext -q '{"query": {"match_all": {}}, "filter":{"term": {"tags": "dev"}}}' -r -u http://login:password@kibana.com:6666/es/ -o ~/file.txt
+                 es2plaintext -i 'abcd--*' -q 'original_tag: parsed.audit' -o z -f @timestamp original_line --to '2018-04-18T23:00'
 """
 import sys
 import argparse
-import es2csv
+import es2plaintext
 
 __version__ = '5.5.2'
 
@@ -40,17 +40,18 @@ def main():
     p.add_argument('--ca-certs', dest='ca_certs', default=None, type=str, help='Location of CA bundle.')
     p.add_argument('--client-cert', dest='client_cert', default=None, type=str, help='Location of Client Auth cert.')
     p.add_argument('--client-key', dest='client_key', default=None, type=str, help='Location of Client Cert Key.')
-    p.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__, help='Show version and exit.')
-    p.add_argument('--debug', dest='debug_mode', action='store_true', help='Debug mode on.')
     p.add_argument('--from', dest='range_from', default=None, type=str, help='Timestamp range: from')
     p.add_argument('--to', dest='range_to', default=None, type=str, help='Timestamp range: to')
+    p.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__, help='Show version and exit.')
+    p.add_argument('--debug', dest='debug_mode', action='store_true', help='Debug mode on.')
+
 
     if len(sys.argv) == 1:
         p.print_help()
         exit()
 
     opts = p.parse_args()
-    es = es2csv.Es2csv(opts)
+    es = es2plaintext.Es2csv(opts)
     es.create_connection()
     es.check_indexes()
     es.search_query()

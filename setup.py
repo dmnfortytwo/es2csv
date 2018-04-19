@@ -10,7 +10,6 @@ classifiers = [
     'Intended Audience :: System Administrators',
     'Environment :: Console',
     'License :: OSI Approved :: Apache Software License',
-    'Programming Language :: Python :: 2 :: Only',
     'Programming Language :: Python :: 2.7',
     'Topic :: System :: Systems Administration',
     'Topic :: Database',
@@ -26,8 +25,8 @@ def read_file(*paths):
         return f.read()
 
 
-src_file = read_file('es2csv_cli.py')
-url = 'https://github.com/taraslayshchuk/es2csv'
+src_file = read_file('es2plaintext_cli.py')
+url = 'https://github.com/dmnfortytwo/es2plaintext'
 
 
 def get_version():
@@ -69,17 +68,16 @@ settings.update(
     version=version,
     description=get_description(),
     long_description='%s\n\n%s' % (readme, history),
-    author='Taras Layshchuk',
-    author_email='taraslayshchuk@gmail.com',
+    author='dmnfortytwo',
+    author_email='dmn42@yandex.ru',
     license='Apache 2.0',
     url=url,
     classifiers=classifiers,
-    python_requires='==2.7.*',
     keywords='elasticsearch export kibana es bulk csv',
-    py_modules=['es2csv', 'es2csv_cli'],
+    py_modules=['es2plaintext', 'es2plaintext_cli'],
     entry_points={
         'console_scripts': [
-            'es2csv = es2csv_cli:main'
+            'es2plaintext = es2plaintext_cli:main'
         ]
     },
     install_requires=requirements,

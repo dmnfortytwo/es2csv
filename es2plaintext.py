@@ -208,14 +208,22 @@ class Es2csv:
                 for line in codecs.open(self.tmp_file, mode='r', encoding='utf-8'):
                     timer += 1
                     if not timer % 20 or timer == self.num_results:
-                      sys.stdout.write("\rWriting to file: {} of {}".format(timer, self.num_results))
+                        sys.stdout.write("\rWriting to file: {} of {}".format(timer, self.num_results))
                     jline = json.loads(line)
                     string = ""
                     for field in self.opts.fields:
-                      if string:
-                        string = "{} {}".format(string, jline[field])
-                      else:
-                        string = jline[field]
+                        if field == '_all':
+                            for key in jline:
+                                if string:
+                                    string = "{} {}".format(string,
+                                                            jline[key])
+                                else:
+                                    string = jline[key]
+                        else:
+                            if string:
+                                string = "{} {}".format(string, jline[field])
+                            else:
+                                string = jline[field]
                     output_file.write("{}\n".format(string))
                 output_file.close()
                 sys.stdout.write("\n")

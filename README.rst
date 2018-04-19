@@ -1,55 +1,47 @@
-======
-es2csv
-======
+============
+es2plaintext
+============
 
-This is modified version of original es2csv.
+This is a modified version of original es2csv - a cli utility for querying Elasticsearch and exporting results to plain text (originally it exported to csv files).
+
+Why? Because I don't need cvs, my goal is to get back logs which were pushed to Elasticsearch. Because some tools like ausearch (a part of audit tools) cannot fetch data from ES.
+
+I also removed progressbar, because less dependencies is better.
+
+Support of date range (it uses @timestamp field) will help you to fetch data without writing large Lucene queries
 
 Removed:
-- csv support (surprise!), export to generic txt file without string escape
+--------
+- csv support (surprise!), you can export to generic txt file only without string escape
 - progressbar. dummy version added instead
+
 Added:
+------
 - query range support. --from <date> (default to 1970-01-01) and --to <date> (default now)
-
-
-
-A CLI tool for exporting data from Elasticsearch into a CSV file
-----------------------------------------------------------------
-
-Command line utility, written in Python, for querying Elasticsearch in Lucene query syntax or Query DSL syntax and exporting result as documents into a CSV file. This tool can query bulk docs in multiple indices and get only selected fields, this reduces query execution time.
-
-Quick Look Demo
----------------
-.. figure:: https://cloud.githubusercontent.com/assets/7491121/12016825/59eb5f82-ad58-11e5-81eb-871a49e39c37.gif
 
 Requirements
 ------------
-| This tool should be used with Elasticsearch 5.x version, for older version please check `2.x release <https://github.com/taraslayshchuk/es2csv/tree/2.x>`_.
+| This tool should be used with Elasticsearch 5.x version, but it works fine with my 6.2.2.
 | You also need `Python 2.7.x <https://www.python.org/downloads/>`_ and `pip <https://pip.pypa.io/en/stable/installing/>`_.
 
 Installation
 ------------
-
 From source:
 
 .. code-block:: bash
 
-    $ pip install git+https://github.com/taraslayshchuk/es2csv.git
-
-From pip:
-
-.. code-block:: bash
-
-    $ pip install es2csv
+    $ pip install git+https://github.com/dmnfortytwo/es2plaintext.git
 
 Usage
 -----
 .. code-block:: bash
 
- $ es2csv [-h] -q QUERY [-u URL] [-a AUTH] [-i INDEX [INDEX ...]]
+ $ es2plaintext [-h] -q QUERY [-u URL] [-a AUTH] [-i INDEX [INDEX ...]]
           [-D DOC_TYPE [DOC_TYPE ...]] [-t TAGS [TAGS ...]] -o FILE
           [-f FIELDS [FIELDS ...]] [-S FIELDS [FIELDS ...]] [-d DELIMITER]
           [-m INTEGER] [-s INTEGER] [-k] [-r] [-e] [--verify-certs]
           [--ca-certs CA_CERTS] [--client-cert CLIENT_CERT]
+          [--from <datetime>] [--to <datetime>]
           [--client-key CLIENT_KEY] [-v] [--debug]
 
  Arguments:
@@ -72,6 +64,8 @@ Usage
   --ca-certs CA_CERTS                      Location of CA bundle.
   --client-cert CLIENT_CERT                Location of Client Auth cert.
   --client-key CLIENT_KEY                  Location of Client Cert Key.
+  --from RANGE_FROM                        Timestamp range: from (ex: 2018-04-18T23:00)
+  --to RANGE_TO                            Timestamp range: to (ex: 2018-04-18T23:00 or 2018-04-18 or now)
   -v, --version                            Show version and exit.
   --debug                                  Debug mode on.
   -h, --help                               show this help message and exit

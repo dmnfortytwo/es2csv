@@ -2,6 +2,13 @@
 
 Release Changelog
 =================
+1.0.0 (2018-04-19)
+------------------
+- Forked from main branch
+- Removed progressbar (replaced with simple counter)
+- Removed csv (now only plain text is supported)
+- Cleaned up stuff
+
 
 5.5.2 (2018-03-21)
 ------------------
