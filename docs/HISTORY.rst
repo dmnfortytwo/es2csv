@@ -2,6 +2,10 @@
 
 Release Changelog
 =================
+1.0.1 (2018-12-10)
+------------------
+- A bit more cleaned up
+
 1.0.0 (2018-04-19)
 ------------------
 - Forked from main branch

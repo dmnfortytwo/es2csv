@@ -64,16 +64,16 @@ with open('requirements.txt') as file_requirements:
 
 settings = dict()
 settings.update(
-    name='es2csv',
+    name='es2plaintext',
     version=version,
     description=get_description(),
     long_description='%s\n\n%s' % (readme, history),
-    author='dmnfortytwo',
-    author_email='dmn42@yandex.ru',
+    author='Taras Layshchuk, dmnfortytwo',
+    author_email='taraslayshchuk@gmail.com, dmn42@yandex.ru',
     license='Apache 2.0',
     url=url,
     classifiers=classifiers,
-    keywords='elasticsearch export kibana es bulk csv',
+    keywords='elasticsearch export kibana es bulk plaintext',
     py_modules=['es2plaintext', 'es2plaintext_cli'],
     entry_points={
         'console_scripts': [

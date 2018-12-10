@@ -4,7 +4,7 @@ es2plaintext
 
 This is a modified version of original es2csv - a cli utility for querying Elasticsearch and exporting results to plain text (originally it exported to csv files).
 
-Why? Because I don't need cvs, my goal is to get back logs which were pushed to Elasticsearch. Because some tools like ausearch (a part of audit tools) cannot fetch data from ES.
+Why? Because I don't need csv, my goal is to get back logs which were pushed to Elasticsearch and some tools like ausearch (a part of audit tools) cannot fetch data from ES.
 
 I also removed progressbar, because less dependencies is better.
 
